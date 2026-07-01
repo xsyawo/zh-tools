@@ -29,7 +29,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build",
     "preview": "node -e \"import { createRequire } from 'module';const require = createRequire(import.meta.url);console.log('zh-kit v' + require('./package.json').version)\""
   },
   "keywords": [
