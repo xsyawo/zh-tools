@@ -1,15 +1,15 @@
 {
-  "name": "zh-tools",
+  "name": "zh-kit",
   "version": "0.1.0",
-  "description": "前端常用工具方法库 — 上传、下载、日期格式化、图片处理、请求封装",
+  "description": "前端常用工具方法库 — 校验、格式化、日期、树形数据、存储、权限、文件、图片、请求封装、防抖节流、剪贴板、字符串、函数、数组、数值运算",
   "type": "module",
-  "main": "./dist/zh-tools.cjs",
-  "module": "./dist/zh-tools.js",
+  "main": "./dist/zh-kit.cjs",
+  "module": "./dist/zh-kit.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/zh-tools.js",
-      "require": "./dist/zh-tools.cjs",
+      "import": "./dist/zh-kit.js",
+      "require": "./dist/zh-kit.cjs",
       "types": "./dist/index.d.ts"
     },
     "./src/*": {
@@ -30,29 +30,41 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run build",
     "prepare": "npm run build",
-    "preview": "node -e \"console.log('zh-tools v' + require('./package.json').version)\""
+    "preview": "node -e \"import { createRequire } from 'module';const require = createRequire(import.meta.url);console.log('zh-kit v' + require('./package.json').version)\""
   },
   "keywords": [
     "utils",
+    "tools",
+    "utility",
     "upload",
     "download",
     "date",
     "image",
-    "tools",
     "request",
     "axios",
+    "validate",
+    "format",
+    "tree",
+    "storage",
+    "debounce",
+    "throttle",
+    "clipboard",
+    "deep-clone",
+    "number",
+    "array",
     "前端工具",
-    "工具方法"
+    "工具方法",
+    "工具函数"
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/xsyawo/zh-kit.git"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/xsyawo/zh-kit/issues"
   },
-  "homepage": "",
-  "author": "",
+  "homepage": "https://github.com/xsyawo/zh-kit#readme",
+  "author": "xsyawo",
   "license": "MIT",
   "peerDependencies": {
     "axios": "^1.7.0"

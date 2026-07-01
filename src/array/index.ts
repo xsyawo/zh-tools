@@ -103,8 +103,8 @@ export function sortBy<T extends Record<string, any>>(
   return [...arr].sort((a, b) => {
     const va = getVal(a)
     const vb = getVal(b)
-    if (typeof va === 'string') return va.localeCompare(vb as string) * dir
-    return (va - (vb as number)) * dir
+    if (typeof va === 'string') return (va as string).localeCompare(vb as string) * dir
+    return ((va as number) - (vb as number)) * dir
   })
 }
 

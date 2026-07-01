@@ -1,5 +1,5 @@
 /**
- * zh-tools — 存储封装
+ * zh-kit — 存储封装
  *
  * 所有方法在 SSR / 非浏览器环境下安全调用（返回 null 或 no-op），不会抛出 ReferenceError。
  */

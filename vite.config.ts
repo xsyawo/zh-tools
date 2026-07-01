@@ -7,7 +7,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'ZhTools',
       formats: ['es', 'cjs'],
-      fileName: (format) => format === 'es' ? 'zh-tools.js' : 'zh-tools.cjs',
+      fileName: (format) => format === 'es' ? 'zh-kit.js' : 'zh-kit.cjs',
     },
     rollupOptions: {
       external: ['axios'],

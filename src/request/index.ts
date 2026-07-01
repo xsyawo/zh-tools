@@ -187,7 +187,7 @@ function getMessageType(code: number | string): 'success' | 'warning' | 'info' |
  * @example
  * ```ts
  * import axios from 'axios'
- * import { createRequest } from 'zh-tools'
+ * import { createRequest } from 'zh-kit'
  *
  * const request = createRequest({
  *   axios: axios.create({ baseURL: '/api' }),

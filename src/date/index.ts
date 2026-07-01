@@ -25,7 +25,7 @@ export function formatDate(date: Date | string | number, fmt: string): string {
   }
   let result = fmt
   for (const [key, val] of Object.entries(map)) {
-    result = result.replaceAll(key, val)
+    result = result.replace(new RegExp(key, 'g'), val)
   }
   return result
 }
