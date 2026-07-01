@@ -72,8 +72,8 @@ function downloadBlob(data: Blob, fileName: string, mimeType: string): void {
 
 /** MIME 类型映射表 */
 const MIME_MAP: Record<string, string> = {
-  excel: 'application/vnd.ms-excel',
-  word: 'application/msword',
+  excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  word: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   zip: 'application/zip',
   html: 'text/html',
   markdown: 'text/markdown',

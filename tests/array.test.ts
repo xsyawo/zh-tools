@@ -78,6 +78,9 @@ describe('range', () => {
   it('should handle start === end', () => {
     expect(range(3, 3)).toEqual([3])
   })
+  it('should return empty array for step=0', () => {
+    expect(range(1, 5, 0)).toEqual([])
+  })
 })
 
 describe('sortBy', () => {

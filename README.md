@@ -66,6 +66,7 @@ import { formatMoney, formatPercent, formatMobile, formatIdCard, formatBankCard,
 
 formatMoney(12345.6)               // '12,345.60' — 金额千分位
 formatPercent(85)                   // '85%'
+formatPercent(0.856, 1)              // '85.6%' — 小数自动 ×100
 formatMobile('13800138000')         // '138****8000' — 手机号脱敏
 formatIdCard('110101199001011234') // '1101**********1234' — 身份证脱敏
 formatBankCard('6222021234567890') // '6222 0212 3456 7890'

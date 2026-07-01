@@ -14,8 +14,18 @@ describe('formatMoney', () => {
 })
 
 describe('formatPercent', () => {
-  it('should append %', () => {
+  it('should append % to whole numbers', () => {
     expect(formatPercent(85)).toBe('85%')
+  })
+  it('should auto-multiply decimal values', () => {
+    expect(formatPercent(0.85)).toBe('85%')
+  })
+  it('should handle 0 gracefully', () => {
+    expect(formatPercent(0)).toBe('0%')
+  })
+  it('should respect decimals parameter', () => {
+    expect(formatPercent(0.856, 1)).toBe('85.6%')
+    expect(formatPercent(85.567, 2)).toBe('85.57%')
   })
 })
 

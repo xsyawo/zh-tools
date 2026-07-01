@@ -15,12 +15,21 @@ export function formatMoney(value: number | string, decimals: number = 2): strin
 
 /**
  * 百分比格式化
- * @param value - 百分比值
+ * @param value - 百分比值。如果 |value| ≤ 1 且含小数，自动 ×100（如 0.85 → '85%'）；否则直接拼接（如 85 → '85%'）
+ * @param decimals - 小数位数，默认不限制
  * @returns 格式化后的百分比字符串
  * @example formatPercent(85) // '85%'
+ * @example formatPercent(0.85) // '85%'
+ * @example formatPercent(0.856, 1) // '85.6%'
  */
-export function formatPercent(value: number | string): string {
-  return `${value}%`
+export function formatPercent(value: number | string, decimals?: number): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  // 小数形式（如 0.85）自动 ×100
+  const pct = num !== 0 && Math.abs(num) <= 1 && !Number.isInteger(num) ? num * 100 : num
+  if (decimals !== undefined) {
+    return `${pct.toFixed(decimals)}%`
+  }
+  return `${pct}%`
 }
 
 /**

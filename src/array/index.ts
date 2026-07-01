@@ -76,6 +76,7 @@ export function chunk<T>(arr: T[], size: number): T[][] {
  * @example range(5, 1, -1) // [5, 4, 3, 2, 1]
  */
 export function range(start: number, end: number, step: number = 1): number[] {
+  if (step === 0) return []
   const result: number[] = []
   if (step > 0) {
     for (let i = start; i <= end; i += step) result.push(i)
