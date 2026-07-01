@@ -409,9 +409,11 @@ createRequest({ message: (msg, type) => myNotification.show({ content: msg, type
 
 ## 开发
 
+> 本项目默认使用 **pnpm** 管理依赖。
+
 ```bash
 # 安装依赖
-pnpm install  # 或 npm install / yarn
+pnpm install
 
 # 运行测试
 pnpm test
