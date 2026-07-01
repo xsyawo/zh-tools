@@ -1,5 +1,5 @@
 /**
- * zh-tools request 模块 — 自定义适配示例
+ * zh-kit request 模块 — 自定义适配示例
  *
  * 模拟场景：
  *   - 后端地址：http://120.11.1.1
@@ -10,7 +10,7 @@
  */
 
 import axios from "axios";
-import { createRequest } from "zh-tools";
+import { createRequest } from "zh-kit";
 
 // 消息提示组件按需引入
 // import { ElMessage } from 'element-plus'
@@ -109,7 +109,7 @@ export const textApi = {
       { textId: String(textId) }, // 额外表单数据
       onProgress, // 上传进度
     ),
-  // ↑ upload 内部自动设 Content-Type: multipart/form-data
+  // ↑ axios 检测到 FormData 会自动设置正确的 Content-Type（含 boundary）
 
   /** 导出 Excel（下载） */
   exportExcel: (params: { startDate: string; endDate: string }) =>

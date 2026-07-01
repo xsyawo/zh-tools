@@ -5,7 +5,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'ZhTools',
+      name: 'ZhKit',
       formats: ['es', 'cjs'],
       fileName: (format) => format === 'es' ? 'zh-kit.js' : 'zh-kit.cjs',
     },
