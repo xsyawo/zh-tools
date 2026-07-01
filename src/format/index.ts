@@ -42,7 +42,7 @@ export function formatMobile(mobile: string): string {
  */
 export function formatIdCard(id: string): string {
   if (id.length < 10) return id
-  return id.replace(/^(\d{4})\d{10}(\w{4})$/, '$1**********$2')
+  return id.replace(/^(\d{4})\d{10}(\d{3}[\dXx])$/, '$1**********$2')
 }
 
 /**

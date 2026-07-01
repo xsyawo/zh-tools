@@ -1,7 +1,8 @@
 /**
  * 将文本复制到剪贴板
  *
- * 优先使用现代 navigator.clipboard API，不支持时降级为 textarea + execCommand
+ * 优先使用现代 navigator.clipboard API，不支持时降级为 textarea + execCommand。
+ * SSR / 非浏览器环境调用会 reject。
  *
  * @param text - 要复制的文本
  * @returns Promise，复制成功时 resolve
@@ -11,8 +12,12 @@
  * copyToClipboard('hello').then(() => console.log('已复制'))
  */
 export function copyToClipboard(text: string): Promise<void> {
+  if (typeof document === 'undefined') {
+    return Promise.reject(new Error('copyToClipboard 仅支持浏览器环境'))
+  }
+
   // 优先使用 Clipboard API（HTTPS / localhost 环境可用）
-  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+  if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
     return navigator.clipboard.writeText(text)
   }
 

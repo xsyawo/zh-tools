@@ -1,28 +1,54 @@
 /**
- * 深拷贝对象，支持 Date、RegExp、Map、Set、数组、普通对象
+ * 深拷贝对象，支持 Date、RegExp、Map、Set、数组、普通对象、循环引用
  * @param obj - 要拷贝的对象
  * @returns 深拷贝后的对象
  * @example deepClone({ a: { b: 1 } }) // { a: { b: 1 } }
  */
 export function deepClone<T>(obj: T): T {
+  return deepCloneInternal(obj, new WeakMap())
+}
+
+function deepCloneInternal<T>(obj: T, cache: WeakMap<object, any>): T {
   if (obj === null || typeof obj !== 'object') return obj
-  if (obj instanceof Date) return new Date(obj.getTime()) as any
-  if (obj instanceof RegExp) return new RegExp(obj) as any
+
+  // 循环引用检测
+  if (cache.has(obj as object)) return cache.get(obj as object)
+
+  if (obj instanceof Date) {
+    const cloned = new Date(obj.getTime())
+    cache.set(obj, cloned)
+    return cloned as any
+  }
+  if (obj instanceof RegExp) {
+    const cloned = new RegExp(obj)
+    cache.set(obj, cloned)
+    return cloned as any
+  }
   if (obj instanceof Map) {
     const result = new Map()
-    obj.forEach((value, key) => result.set(deepClone(key), deepClone(value)))
+    cache.set(obj, result)
+    obj.forEach((value, key) => result.set(deepCloneInternal(key, cache), deepCloneInternal(value, cache)))
     return result as any
   }
   if (obj instanceof Set) {
     const result = new Set()
-    obj.forEach(value => result.add(deepClone(value)))
+    cache.set(obj, result)
+    obj.forEach(value => result.add(deepCloneInternal(value, cache)))
     return result as any
   }
-  if (Array.isArray(obj)) return obj.map(item => deepClone(item)) as any
+  if (Array.isArray(obj)) {
+    const result: any[] = []
+    cache.set(obj, result)
+    for (let i = 0; i < obj.length; i++) {
+      result[i] = deepCloneInternal(obj[i], cache)
+    }
+    return result as any
+  }
   const cloned: Record<string, any> = {}
+  cache.set(obj, cloned)
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      cloned[key] = deepClone((obj as any)[key])
+      cloned[key] = deepCloneInternal((obj as any)[key], cache)
     }
   }
   return cloned as T
@@ -157,4 +183,57 @@ export function set(obj: Record<string, any>, path: string, value: any): void {
     current = current[keys[i]]
   }
   current[keys[keys.length - 1]] = value
+}
+
+// ==================== 对象扁平化 & 对比 ====================
+
+/**
+ * 对象扁平化（嵌套 → 平铺，路径用点号连接）
+ * @param obj - 要扁平化的对象
+ * @param prefix - 内部递归用，调用时无需传
+ * @returns 扁平化后的对象
+ * @example flatten({ a: { b: 1, c: 2 }, d: 3 }) // { 'a.b': 1, 'a.c': 2, d: 3 }
+ */
+export function flatten(obj: Record<string, any>, prefix: string = ''): Record<string, any> {
+  const result: Record<string, any> = {}
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) continue
+    const path = prefix ? `${prefix}.${key}` : key
+    const val = obj[key]
+    if (isPlainObject(val)) {
+      Object.assign(result, flatten(val, path))
+    } else {
+      result[path] = val
+    }
+  }
+  return result
+}
+
+/**
+ * 浅层差异比较 —— 返回 b 相对于 a 发生变化的字段（浅比较）
+ * @param a - 原始对象
+ * @param b - 新对象
+ * @returns 有变化的字段组成的新对象（仅包含 b 中与 a 不同的 key）
+ * @example diff({ a: 1, b: 2 }, { a: 1, b: 3, c: 4 }) // { b: 3, c: 4 }
+ */
+export function diff<T extends Record<string, any>>(a: T, b: T): Partial<T> {
+  const result: Partial<T> = {}
+  const allKeys = new Set([...Object.keys(a), ...Object.keys(b)])
+  for (const key of allKeys) {
+    if (a[key] !== b[key]) {
+      result[key as keyof T] = b[key]
+    }
+  }
+  return result
+}
+
+/**
+ * 浅合并（Object.assign 的快捷方式，返回新对象）
+ * @param target - 目标对象
+ * @param sources - 源对象列表
+ * @returns 合并后的新对象
+ * @example merge({ a: 1 }, { b: 2 }) // { a: 1, b: 2 }
+ */
+export function merge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
+  return Object.assign({}, target, ...sources)
 }

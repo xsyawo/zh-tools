@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatDate, formatDateTime, formatRelative, getStartOfDay, getEndOfDay, getDateRange, diffDays } from '../src/date'
+import { formatDate, formatDateTime, formatRelative, getStartOfDay, getEndOfDay, getDateRange, diffDays, getAge, addDays, addMonths, isBefore, isAfter, isSameDay } from '../src/date'
 
 describe('formatDate', () => {
   it('should format with YYYY-MM-DD', () => {
@@ -80,5 +80,76 @@ describe('diffDays', () => {
   })
   it('should return negative for past dates', () => {
     expect(diffDays(new Date('2026-06-01'), new Date('2026-05-31'))).toBe(-1)
+  })
+})
+
+describe('getAge', () => {
+  it('should calculate age from birth date', () => {
+    // Use a fixed birth date 30 years ago
+    const birth = new Date()
+    birth.setFullYear(birth.getFullYear() - 30)
+    birth.setDate(birth.getDate() - 1) // ensure birthday has passed this year
+    expect(getAge(birth)).toBe(30)
+  })
+})
+
+describe('addDays', () => {
+  it('should add days', () => {
+    const result = addDays(new Date('2026-05-31'), 1)
+    expect(result.getDate()).toBe(1)
+    expect(result.getMonth()).toBe(5) // June
+  })
+
+  it('should subtract days', () => {
+    const result = addDays(new Date('2026-06-01'), -1)
+    expect(result.getDate()).toBe(31)
+    expect(result.getMonth()).toBe(4) // May
+  })
+})
+
+describe('addMonths', () => {
+  it('should add months', () => {
+    const result = addMonths(new Date('2026-01-15'), 1)
+    expect(result.getMonth()).toBe(1) // February
+  })
+
+  it('should subtract months', () => {
+    const result = addMonths(new Date('2026-03-15'), -1)
+    expect(result.getMonth()).toBe(1) // February
+  })
+
+  it('should handle month-end overflow by rolling forward', () => {
+    const result = addMonths(new Date('2026-01-31'), 1)
+    expect(result.getMonth()).toBe(2) // March (Feb has no 31st)
+  })
+})
+
+describe('isBefore', () => {
+  it('should return true when date1 is before date2', () => {
+    expect(isBefore(new Date('2026-01-01'), new Date('2026-06-01'))).toBe(true)
+  })
+
+  it('should return false when date1 is after date2', () => {
+    expect(isBefore(new Date('2026-06-01'), new Date('2026-01-01'))).toBe(false)
+  })
+})
+
+describe('isAfter', () => {
+  it('should return true when date1 is after date2', () => {
+    expect(isAfter(new Date('2026-06-01'), new Date('2026-01-01'))).toBe(true)
+  })
+
+  it('should return false when date1 is before date2', () => {
+    expect(isAfter(new Date('2026-01-01'), new Date('2026-06-01'))).toBe(false)
+  })
+})
+
+describe('isSameDay', () => {
+  it('should return true for same calendar day', () => {
+    expect(isSameDay(new Date('2026-05-31'), new Date('2026-05-31 23:59:59'))).toBe(true)
+  })
+
+  it('should return false for different days', () => {
+    expect(isSameDay(new Date('2026-05-31'), new Date('2026-06-01'))).toBe(false)
   })
 })

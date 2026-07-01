@@ -32,10 +32,10 @@ import { isPhone, isEmail, isIdCard, isUrl, isLicensePlate, isEmpty, isChinese, 
 
 isPhone('13800138000')             // true — 校验手机号
 isEmail('test@example.com')        // true — 校验邮箱
-isIdCard('110101199001011234')     // true — 校验身份证（含校验位）
+isIdCard('110101199001011237')     // true — 校验身份证（含出生日期 & 校验位）
 isUrl('https://example.com')       // true — 校验 URL
 isLicensePlate('京A12345')         // true — 校验车牌号（含新能源）
-isEmpty(null)                      // true — 判断空值
+isEmpty(null)                      // true — 判断空值（含 NaN）
 isChinese('中文')                   // true — 判断纯中文
 isDecimal(123.45, 2)               // true — 判断小数（可限制精度）
 ```
@@ -43,9 +43,9 @@ isDecimal(123.45, 2)               // true — 判断小数（可限制精度）
 ### 对象工具 (object)
 
 ```ts
-import { deepClone, deepMerge, omit, pick, clearObj, isPlainObject, get, set } from 'zh-tools'
+import { deepClone, deepMerge, omit, pick, clearObj, isPlainObject, get, set, flatten, diff, merge } from 'zh-tools'
 
-deepClone({ a: { b: 1 } })          // 深拷贝（支持 Date、RegExp、Map、Set）
+deepClone({ a: { b: 1 } })          // 深拷贝（支持循环引用、Date、RegExp、Map、Set）
 deepMerge({ a: 1 }, { b: 2 })       // 深度合并
 omit({ a: 1, b: 2 }, ['a'])         // 排除字段 → { b: 2 }
 pick({ a: 1, b: 2 }, ['a'])         // 选取字段 → { a: 1 }
@@ -53,6 +53,10 @@ clearObj({ a: 'hello', b: 42 })     // 清空 → { a: '', b: 0 }
 isPlainObject({})                    // true
 get({ a: { b: 42 } }, 'a.b')        // 42 — 按路径安全取值
 set({}, 'a.b', 1)                   // 按路径设置值
+
+flatten({ a: { b: 1, c: 2 }, d: 3 }) // { 'a.b': 1, 'a.c': 2, d: 3 }
+diff({ a: 1, b: 2 }, { a: 1, b: 3 }) // { b: 3 } — 浅层差异对比
+merge({ a: 1 }, { b: 2 })           // { a: 1, b: 2 } — 浅合并
 ```
 
 ### 数据格式化 (format)
@@ -83,7 +87,7 @@ urlParamsToObj('?a=1&b=2')         // { a: '1', b: '2' }
 ### 日期时间 (date)
 
 ```ts
-import { formatDate, formatDateTime, formatRelative, getStartOfDay, getEndOfDay, getDateRange, diffDays } from 'zh-tools'
+import { formatDate, formatDateTime, formatRelative, getStartOfDay, getEndOfDay, getDateRange, diffDays, getAge, addDays, addMonths, isBefore, isAfter, isSameDay } from 'zh-tools'
 
 formatDate(new Date(), 'YYYY-MM-DD')         // '2026-05-31'
 formatDateTime(new Date())                    // '2026-05-31 14:30:00'
@@ -92,6 +96,13 @@ getStartOfDay(new Date())                     // 00:00:00.000
 getEndOfDay(new Date())                       // 23:59:59.999
 getDateRange('week')                          // [本周一, 本周日]
 diffDays(new Date('2026-05-31'), new Date('2026-06-01')) // 1
+
+getAge('1990-01-01')                          // 36 — 根据生日算年龄
+addDays(new Date('2026-05-31'), 1)            // 2026-06-01
+addMonths(new Date('2026-01-31'), 1)          // 2026-02-28（自动处理月末溢出）
+isBefore(new Date('2026-01-01'), new Date('2026-06-01')) // true
+isAfter(new Date('2026-06-01'), new Date('2026-01-01'))  // true
+isSameDay(new Date('2026-05-31'), new Date('2026-05-31 23:59:59')) // true
 ```
 
 ### 树形数据处理 (tree)
@@ -108,7 +119,7 @@ treeToList(tree)                    // 树转扁平列表
 findTreeNode(tree, n => n.id === 2) // 查找节点
 findTreePath(tree, n => n.id === 2) // 节点路径（面包屑用）
 filterTree(tree, n => n.id === 2)   // 过滤（保留层级）
-walkTree(tree, n => console.log(n)) // 遍历
+walkTree(tree, n => console.log(n)) // 遍历（BFS，O(n)）
 mapTree(tree, n => ({ ...n, label: n.name })) // 映射
 ```
 
@@ -129,6 +140,8 @@ setCookie('theme', 'dark', { expires: 7 })  // 7 天过期
 getCookie('theme')
 removeCookie('theme')
 ```
+
+> SSR 环境安全：所有方法在非浏览器环境下静默降级（返回 null / no-op），不会抛出 ReferenceError。
 
 ### 权限校验 (auth)
 
@@ -163,7 +176,7 @@ download.html(blobData, 'page.html')          // 下载 HTML
 download.image({ url: 'https://example.com/photo.png' })
 download.image({ url: 'https://example.com/photo.png', canvasWidth: 800, drawWithImageSize: true })
 
-// 文件上传（支持进度回调）
+// 文件上传（支持进度回调 & 取消）
 const response = await uploadFile({
   url: '/api/upload',
   file: fileInput.files[0],
@@ -184,6 +197,114 @@ const compressed = await compressImage(file, { maxWidth: 800, quality: 0.7 })
 const dims = await getImageDimensions(file)     // { width: 1920, height: 1080 }
 const thumb = await createImageThumbnail(file, 200)
 const base64 = imageToBase64(imgElement)         // Canvas 转 Base64
+```
+
+> `compressImage` 在图片无需缩放时会跳过重新编码，直接返回原始数据，避免浪费 CPU。
+
+### 防抖节流 (debounce)
+
+```ts
+import { debounce, throttle } from 'zh-tools'
+
+// 搜索框输入防抖
+const search = debounce((keyword: string) => fetch('/api/search?q=' + keyword), 500)
+input.oninput = (e) => search(e.target.value)
+
+// 滚动事件节流
+const onScroll = throttle(() => console.log('scrolling...'), 200)
+window.addEventListener('scroll', onScroll)
+```
+
+> 包装后的函数保留 `this` 上下文，可以在 Vue 组件 method 中正常使用。
+
+### 剪贴板 (clipboard)
+
+```ts
+import { copyToClipboard } from 'zh-tools'
+
+await copyToClipboard('复制的文本')
+// 或 Promise 风格
+copyToClipboard('hello').then(() => console.log('已复制'))
+```
+
+> 优先使用现代 `navigator.clipboard` API，不支持时自动降级为 `textarea + execCommand`。SSR 环境返回 rejected Promise。
+
+---
+
+### 字符串工具 (string)
+
+```ts
+import { uuid, randomStr, camelToSnake, snakeToCamel, truncate, escapeHtml, stripHtml } from 'zh-tools'
+
+uuid()                              // '550e8400-e29b-41d4-a716-446655440000'
+randomStr(6)                        // 'aB3kF8' — 默认不含易混淆字符
+randomStr(4, '0123456789')          // '3829' — 自定义字符集
+
+camelToSnake('userName')            // 'user_name' — 驼峰 → 下划线
+camelToSnake('APIKey')              // 'api_key'  — 正确处理缩写词
+snakeToCamel('user_name')           // 'userName' — 下划线 → 驼峰
+
+truncate('很长的文本内容', 4)         // '很长…' — 截断加省略号
+escapeHtml('<div>"hello"</div>')    // '&lt;div&gt;&quot;hello&quot;&lt;/div&gt;' — XSS 防护
+stripHtml('<p>hello <b>world</b></p>') // 'hello world' — 去除 HTML 标签
+```
+
+### 函数工具 (function)
+
+```ts
+import { sleep, once, retry } from 'zh-tools'
+
+await sleep(1000)                   // 异步延迟，等待 1 秒
+
+const init = once(() => console.log('只执行一次'))
+init() // 输出
+init() // 不输出，返回上次结果
+
+const data = await retry(() => fetch('/api/data'), 3, 1000) // 最多重试 3 次，间隔 1 秒
+```
+
+### 数组工具 (array)
+
+```ts
+import { groupBy, unique, uniqueBy, chunk, range, sortBy, sumBy, move } from 'zh-tools'
+
+groupBy([{ type: 'A', val: 1 }, { type: 'B', val: 2 }, { type: 'A', val: 3 }], 'type')
+// { A: [{...}, {...}], B: [{...}] }
+
+unique([1, 2, 2, 3])               // [1, 2, 3]
+uniqueBy([{ id: 1 }, { id: 2 }, { id: 1 }], 'id') // [{ id: 1 }, { id: 2 }]
+
+chunk([1, 2, 3, 4, 5], 2)          // [[1, 2], [3, 4], [5]]
+range(1, 5)                         // [1, 2, 3, 4, 5]
+range(5, 1, -1)                     // [5, 4, 3, 2, 1]
+
+sortBy([{ a: 3 }, { a: 1 }], 'a')  // [{ a: 1 }, { a: 3 }]
+sortBy([{ a: 3 }, { a: 1 }], 'a', 'desc') // [{ a: 3 }, { a: 1 }]
+
+sumBy([{ price: 10 }, { price: 20 }], 'price') // 30
+
+move([1, 2, 3, 4], 0, 2)           // [2, 3, 1, 4] — 元素换位
+```
+
+### 数值工具 (number)
+
+```ts
+import { add, sub, mul, div, round, clamp, random, inRange } from 'zh-tools'
+
+// 精确浮点运算（解决 0.1 + 0.2 !== 0.3 问题）
+add(0.1, 0.2)                       // 0.3
+sub(1, 0.9)                         // 0.1
+mul(0.1, 0.2)                       // 0.02
+div(0.3, 0.1)                       // 3
+
+round(1.005, 2)                     // 1.01 — 安全四舍五入（原生 toFixed 有银行家舍入问题）
+round(-1.005, 2)                    // -1.01
+
+clamp(120, 0, 100)                  // 100 — 值钳制
+clamp(-5, 0, 100)                   // 0
+
+random(1, 10)                       // 7 — [1, 10] 随机整数
+inRange(5, 1, 10)                   // true
 ```
 
 ---
@@ -307,10 +428,10 @@ pnpm run build
 | 模块 | 文件 | 方法数 |
 |------|------|--------|
 | validate | `src/validate/` | 8 |
-| object | `src/object/` | 8 |
+| object | `src/object/` | 11 |
 | format | `src/format/` | 6 |
 | url | `src/url/` | 6 |
-| date | `src/date/` | 7 |
+| date | `src/date/` | 13 |
 | tree | `src/tree/` | 7 |
 | storage | `src/storage/` | 11 |
 | auth | `src/auth/` | 4 |
@@ -318,7 +439,10 @@ pnpm run build
 | image | `src/image/` | 4 |
 | debounce | `src/debounce/` | 2 |
 | clipboard | `src/clipboard/` | 1 |
-| string | `src/string/` | 2 |
+| string | `src/string/` | 7 |
+| function | `src/function/` | 3 |
+| array | `src/array/` | 8 |
+| number | `src/number/` | 8 |
 | request | `src/request/` | 7 个方法 + createRequest 工厂函数 |
 
 ## License

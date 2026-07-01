@@ -17,12 +17,19 @@ export function getUrlParam(key: string, search?: string): string | null {
  * @example getAllUrlParams('?a=1&b=2') // { a: '1', b: '2' }
  */
 export function getAllUrlParams(search?: string): Record<string, string> {
-  const s = search ?? (typeof window !== 'undefined' ? window.location.search : '')
+  // SSR 安全：仅在浏览器环境读取 location.search
+  const s = search ?? (typeof window !== 'undefined' && window.location ? window.location.search : '')
   const cleanSearch = s.startsWith('?') ? s.slice(1) : s
   if (!cleanSearch) return {}
   const result: Record<string, string> = {}
   for (const part of cleanSearch.split('&')) {
-    const [key, value] = part.split('=')
+    const eqIdx = part.indexOf('=')
+    if (eqIdx === -1) {
+      if (part) result[decodeURIComponent(part)] = ''
+      continue
+    }
+    const key = part.slice(0, eqIdx)
+    const value = part.slice(eqIdx + 1)
     if (key) {
       result[decodeURIComponent(key)] = value ? decodeURIComponent(value) : ''
     }

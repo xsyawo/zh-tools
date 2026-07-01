@@ -28,13 +28,25 @@ export function isEmail(val: string): boolean {
 }
 
 /**
- * 校验身份证号（18位，含校验位算法验证）
+ * 校验身份证号（18位，含出生日期验证和校验位算法验证）
  * @param val - 身份证号字符串
  * @returns 是否有效身份证号
  * @example isIdCard('110101199001011234') // true
  */
 export function isIdCard(val: string): boolean {
   if (!/^\d{17}[\dXx]$/.test(val)) return false
+
+  // 校验出生日期
+  const year = parseInt(val.slice(6, 10), 10)
+  const month = parseInt(val.slice(10, 12), 10)
+  const day = parseInt(val.slice(12, 14), 10)
+  if (year < 1900 || year > new Date().getFullYear()) return false
+  if (month < 1 || month > 12) return false
+  // 当月最大天数
+  const maxDay = new Date(year, month, 0).getDate()
+  if (day < 1 || day > maxDay) return false
+
+  // 校验位算法
   const factors = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
   const parity = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
   let sum = 0
@@ -70,13 +82,15 @@ export function isLicensePlate(val: string): boolean {
 }
 
 /**
- * 判断值是否为空（null / undefined / 空字符串 / 空数组 / 空对象）
+ * 判断值是否为空（null / undefined / NaN / 空字符串 / 空数组 / 空对象）
  * @param val - 要判断的值
  * @returns 是否为空
  * @example isEmpty(null) // true
+ * @example isEmpty(NaN) // true
  */
 export function isEmpty(val: any): boolean {
   if (val === null || val === undefined) return true
+  if (typeof val === 'number' && isNaN(val)) return true
   if (typeof val === 'string') return val.trim() === ''
   if (Array.isArray(val)) return val.length === 0
   if (Object.prototype.toString.call(val) === '[object Object]') return Object.keys(val).length === 0
@@ -99,9 +113,13 @@ export function isChinese(val: string): boolean {
  * @param decimals - 可选，限制小数位数
  * @returns 是否合法数字
  * @example isDecimal(123.45) // true
+ * @example isDecimal(0.1 + 0.2, 1) // true — 浮点精度安全
  */
 export function isDecimal(val: string | number, decimals?: number): boolean {
-  if (typeof val === 'number') val = String(val)
+  if (typeof val === 'number') {
+    if (!isFinite(val)) return false
+    val = val.toString()
+  }
   if (!/^-?\d+(\.\d+)?$/.test(val)) return false
   if (decimals !== undefined) {
     const parts = val.split('.')

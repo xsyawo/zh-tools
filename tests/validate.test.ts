@@ -38,9 +38,9 @@ describe('isEmail', () => {
 
 describe('isIdCard', () => {
   it('valid ID cards', () => {
-    expect(isIdCard('110101199001011234')).toBe(true)
-    expect(isIdCard('11010119900101123X')).toBe(true)
-    expect(isIdCard('11010119900101123x')).toBe(true)
+    expect(isIdCard('110101199001010074')).toBe(true)
+    expect(isIdCard('11010119900101100X')).toBe(true)
+    expect(isIdCard('11010119900101100x')).toBe(true)
   })
   it('invalid ID cards', () => {
     expect(isIdCard('123456789012345')).toBe(false)

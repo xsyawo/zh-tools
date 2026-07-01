@@ -17,7 +17,10 @@
  * - request: axios 请求封装（token 注入、响应解包、错误处理、401 跳转）
  * - debounce: 防抖节流
  * - clipboard: 剪贴板复制
- * - string: 字符串工具（UUID、随机字符串）
+ * - string: 字符串工具（UUID、随机字符串、命名风格转换、文本截断）
+ * - function: 函数工具（sleep、once、retry）
+ * - array: 数组工具（分组、去重、分块、排序、求和）
+ * - number: 数值工具（精确运算、四舍五入、范围钳制）
  *
  * @packageDocumentation
  */
@@ -36,3 +39,6 @@ export * from './request/index'
 export * from './debounce/index'
 export * from './clipboard/index'
 export * from './string/index'
+export * from './function/index'
+export * from './array/index'
+export * from './number/index'

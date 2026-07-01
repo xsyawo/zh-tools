@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { imageToBase64, getFileExtension, getFileSizeStr } from '../src/file'
+import { imageToBase64 } from '../src/image'
+import { getFileExtension, getFileSizeStr } from '../src/file'
 import { formatFileSize } from '../src/format'
 
 // image module tests rely on canvas/Image which are limited in happy-dom

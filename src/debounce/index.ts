@@ -17,10 +17,11 @@ export function debounce<T extends (...args: any[]) => any>(
   delay: number = 300,
 ): (...args: Parameters<T>) => void {
   let timer: ReturnType<typeof setTimeout> | null = null
-  return (...args: Parameters<T>) => {
+  return function (this: any, ...args: Parameters<T>) {
+    const context = this
     if (timer !== null) clearTimeout(timer)
     timer = setTimeout(() => {
-      fn(...args)
+      fn.apply(context, args)
       timer = null
     }, delay)
   }
@@ -45,11 +46,11 @@ export function throttle<T extends (...args: any[]) => any>(
   interval: number = 300,
 ): (...args: Parameters<T>) => void {
   let lastTime = 0
-  return (...args: Parameters<T>) => {
+  return function (this: any, ...args: Parameters<T>) {
     const now = Date.now()
     if (now - lastTime >= interval) {
       lastTime = now
-      fn(...args)
+      fn.apply(this, args)
     }
   }
 }

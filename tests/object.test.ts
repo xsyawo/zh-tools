@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deepClone, deepMerge, omit, pick, clearObj, isPlainObject, get, set } from '../src/object'
+import { deepClone, deepMerge, omit, pick, clearObj, isPlainObject, get, set, flatten, diff, merge } from '../src/object'
 
 describe('deepClone', () => {
   it('primitives', () => {
@@ -116,5 +116,52 @@ describe('set', () => {
     const obj = {}
     set(obj, 'a.b.c', 42)
     expect((obj as any).a.b.c).toBe(42)
+  })
+})
+
+describe('flatten', () => {
+  it('should flatten nested objects with dot notation', () => {
+    expect(flatten({ a: { b: 1, c: 2 }, d: 3 })).toEqual({ 'a.b': 1, 'a.c': 2, d: 3 })
+  })
+
+  it('should return single-level object as-is', () => {
+    expect(flatten({ x: 1, y: 2 })).toEqual({ x: 1, y: 2 })
+  })
+
+  it('should handle deeply nested objects', () => {
+    expect(flatten({ a: { b: { c: 1 } } })).toEqual({ 'a.b.c': 1 })
+  })
+})
+
+describe('diff', () => {
+  it('should return changed and new fields from b vs a', () => {
+    expect(diff({ a: 1, b: 2 }, { a: 1, b: 3, c: 4 })).toEqual({ b: 3, c: 4 })
+  })
+
+  it('should return empty object when identical', () => {
+    expect(diff({ a: 1 }, { a: 1 })).toEqual({})
+  })
+
+  it('should detect removed keys as change', () => {
+    const result = diff({ a: 1, b: 2 }, { a: 1 })
+    // b is removed; appears as undefined in returned partial
+    expect(result.b).toBeUndefined()
+  })
+})
+
+describe('merge', () => {
+  it('should shallow merge objects', () => {
+    expect(merge({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 })
+  })
+
+  it('should not mutate target', () => {
+    const target = { a: 1 }
+    const result = merge(target, { b: 2 })
+    expect(target).toEqual({ a: 1 })
+    expect(result).toEqual({ a: 1, b: 2 })
+  })
+
+  it('should overwrite same keys with later sources', () => {
+    expect(merge({ a: 1 }, { a: 2 })).toEqual({ a: 2 })
   })
 })

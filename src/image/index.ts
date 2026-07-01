@@ -24,6 +24,22 @@ export function compressImage(file: File | Blob, options?: CompressOptions): Pro
     img.onload = () => {
       URL.revokeObjectURL(url)
       let { width, height } = img
+
+      // 计算是否需要缩放
+      const needsResize =
+        width > maxWidth || (maxHeight !== undefined && height > maxHeight)
+
+      if (!needsResize) {
+        // 无需缩放，跳过 Canvas 重绘，直接返回原始文件数据
+        if (file instanceof Blob) {
+          resolve(file)
+        } else {
+          // File 实例，直接返回（也是 Blob 的子类）
+          resolve(file)
+        }
+        return
+      }
+
       if (width > maxWidth) {
         height = (height / width) * maxWidth
         width = maxWidth

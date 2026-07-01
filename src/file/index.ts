@@ -1,3 +1,5 @@
+import { formatFileSize } from '../format/index'
+
 /** 图片下载选项 */
 export interface DownloadImageOptions {
   /** 图片 URL */
@@ -65,12 +67,7 @@ export function downloadByBlob(blob: Blob, filename: string): void {
  */
 function downloadBlob(data: Blob, fileName: string, mimeType: string): void {
   const blob = new Blob([data], { type: mimeType })
-  const href = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = href
-  a.download = fileName
-  a.click()
-  URL.revokeObjectURL(href)
+  downloadByBlob(blob, fileName)
 }
 
 /** MIME 类型映射表 */
@@ -246,7 +243,9 @@ export function uploadFile(options: UploadOptions): Promise<any> {
       }
     }
 
-    xhr.onerror = () => reject(new Error('Upload failed'))
+    xhr.upload.onerror = () => reject(new Error('Upload failed'))
+    xhr.upload.onabort = () => reject(new Error('Upload aborted'))
+    xhr.onerror = () => reject(new Error('Network error'))
     xhr.send(formData)
   })
 }
@@ -258,11 +257,7 @@ export function uploadFile(options: UploadOptions): Promise<any> {
  * @example getFileSizeStr(1024) // '1.00 KB'
  */
 export function getFileSizeStr(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  const k = 1024
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${units[i]}`
+  return formatFileSize(bytes)
 }
 
 /**

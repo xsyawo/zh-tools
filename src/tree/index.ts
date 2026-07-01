@@ -42,13 +42,15 @@ export function listToTree<T extends Record<string, any>>(list: T[], options?: T
 
   for (const item of list) {
     const node = map.get(item[idKey])!
-    if (item[parentIdKey] === rootValue || item[parentIdKey] === undefined || item[parentIdKey] === null) {
+    const parentId = item[parentIdKey]
+    if (parentId === rootValue || parentId === undefined || parentId === null) {
       tree.push(node)
     } else {
-      const parent = map.get(item[parentIdKey])
+      const parent = map.get(parentId)
       if (parent) {
         parent[childrenKey].push(node)
       } else {
+        // 父节点不在当前列表中，作为根节点处理
         tree.push(node)
       }
     }
@@ -142,8 +144,9 @@ export function filterTree<T>(tree: TreeNode<T>[], predicate: (node: TreeNode<T>
  */
 export function walkTree<T>(tree: TreeNode<T>[], fn: (node: TreeNode<T>) => void): void {
   const queue = [...tree]
-  while (queue.length) {
-    const node = queue.shift()!
+  let head = 0
+  while (head < queue.length) {
+    const node = queue[head++]
     fn(node)
     if (node.children?.length) {
       queue.push(...node.children)

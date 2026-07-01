@@ -369,7 +369,6 @@ export function createRequest(config: RequestConfig): RequestInstance {
     }
 
     return instance.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: onProgress
         ? (e: { total?: number; loaded: number }) => {
             if (e.total) {
