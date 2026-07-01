@@ -52,6 +52,13 @@
     "deep-clone",
     "number",
     "array",
+    "group-by",
+    "sort-by",
+    "sleep",
+    "retry",
+    "uuid",
+    "camel-case",
+    "snake-case",
     "前端工具",
     "工具方法",
     "工具函数"
